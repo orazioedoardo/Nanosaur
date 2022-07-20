@@ -804,17 +804,6 @@ static void UpdatePlayer(ObjNode *theNode)
 		gMyCoord = gCoord;							// only if no portal so camera wont track me
 		
 	UpdateObject(theNode);
-	
-			/* CHECK FOR EASTER EGG */
-			
-	if (gMyCoord.y > 1500)						// while riding birdie does this
-	{
-		GetCheatWeapons();
-		GetHealth(1);
-		StartMyShield(gPlayerObj);
-		gFuel = MAX_FUEL_CAPACITY;
-		gInfobarUpdateBits |= UPDATE_FUEL;
-	}
 }
 
 
