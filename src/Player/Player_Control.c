@@ -347,7 +347,6 @@ KeyControlType	bits;
 		if (theNode->JetThrust <= 0.0f)			// see if just started it
 			StartJetPack(theNode);
 		else
-		if (theNode->JetThrust < MAX_JET_THRUST)
 			theNode->JetThrust += gFramesPerSecondFrac;
 	}
 	else
@@ -582,9 +581,6 @@ float	targetHeight,diff,fps;
 			/* DEAL WITH Y */
 
 	targetHeight = 	gMostRecentCharacterFloorY + (theNode->JetThrust * 300.0f) + 100.0f;	// calc desired hover height	
-	if (targetHeight > MAX_JET_HEIGHT)
-		targetHeight = MAX_JET_HEIGHT;	
-	
 	diff = targetHeight - gCoord.y;													// calc dist to hover height
 	dy =  diff * 2.0f;																// accel toward target height
 	
