@@ -364,7 +364,7 @@ Str255		s;
 OSErr MakePrefsFSSpec(const char* prefFileName, FSSpec* spec)
 {
 	static Boolean checkedOnce = false;
-	static const char* PREFS_FOLDER = "Nanosaur";
+	static const char* PREFS_FOLDER = "NanosaurTricks";
 
 	if (!checkedOnce)
 	{
