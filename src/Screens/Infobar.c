@@ -98,7 +98,7 @@ short	i;
 
 	gNumLives = 2;
 	gScore = 0;
-	gFuel = 0; //MAX_FUEL_CAPACITY/6;
+	gFuel = MAX_FUEL_CAPACITY/2;
 	gTimeRemaining = LEVEL_DURATION;
 	gOldTime = 1000000000;
 	

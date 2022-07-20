@@ -97,17 +97,17 @@ short	i;
 	gPossibleAttackModes[ATTACK_MODE_BLASTER] 	= true;
 	gWeaponInventory[ATTACK_MODE_BLASTER] 		= 50;
 
-	gPossibleAttackModes[ATTACK_MODE_HEATSEEK] 	= false;
-	gWeaponInventory[ATTACK_MODE_HEATSEEK] 		= 0;	
+	gPossibleAttackModes[ATTACK_MODE_HEATSEEK] 	= true;
+	gWeaponInventory[ATTACK_MODE_HEATSEEK] 		= 50;
 
-	gPossibleAttackModes[ATTACK_MODE_SONICSCREAM] = false;
-	gWeaponInventory[ATTACK_MODE_SONICSCREAM] 	= 0;	
+	gPossibleAttackModes[ATTACK_MODE_SONICSCREAM] = true;
+	gWeaponInventory[ATTACK_MODE_SONICSCREAM] 	= 50;
 
-	gPossibleAttackModes[ATTACK_MODE_TRIBLAST] = false;
-	gWeaponInventory[ATTACK_MODE_TRIBLAST] 		= 0;	
+	gPossibleAttackModes[ATTACK_MODE_TRIBLAST] = true;
+	gWeaponInventory[ATTACK_MODE_TRIBLAST] 		= 50;
 
-	gPossibleAttackModes[ATTACK_MODE_NUKE] = false;
-	gWeaponInventory[ATTACK_MODE_NUKE] 		= 0;	
+	gPossibleAttackModes[ATTACK_MODE_NUKE] = true;
+	gWeaponInventory[ATTACK_MODE_NUKE] 		= 50;
 	
 	gInfobarUpdateBits |= UPDATE_WEAPONICON;
 }
@@ -406,7 +406,7 @@ float	r,fps;
 
 				/* UPDATE INFOBAR */
 				
-		if (--gWeaponInventory[gCurrentAttackMode] == 0)				// dec inventory & if run out, select next weapon
+		if (gWeaponInventory[gCurrentAttackMode] == 0)				// dec inventory & if run out, select next weapon
 			NextAttackMode();
 		gInfobarUpdateBits |= UPDATE_WEAPONICON;						// tell system to update this at end of frame
 
@@ -513,7 +513,7 @@ float	r;
 		
 				/* UPDATE INFOBAR */
 				
-		if (--gWeaponInventory[gCurrentAttackMode] == 0)				// dec inventory & if run out, select next weapon
+		if (gWeaponInventory[gCurrentAttackMode] == 0)				// dec inventory & if run out, select next weapon
 		{
 			gPossibleAttackModes[gCurrentAttackMode] = false;
 			NextAttackMode();
@@ -624,7 +624,7 @@ float	r;
 
 				/* UPDATE INFOBAR */
 				
-		if (--gWeaponInventory[gCurrentAttackMode] == 0)			// dec inventory & if run out, select next weapon
+		if (gWeaponInventory[gCurrentAttackMode] == 0)			// dec inventory & if run out, select next weapon
 		{
 			gPossibleAttackModes[gCurrentAttackMode] = false;
 			NextAttackMode();
@@ -858,7 +858,7 @@ float	r;
 		
 				/* UPDATE INFOBAR */
 				
-		if (--gWeaponInventory[gCurrentAttackMode] == 0)				// dec inventory & if run out, select next weapon
+		if (gWeaponInventory[gCurrentAttackMode] == 0)				// dec inventory & if run out, select next weapon
 		{
 			gPossibleAttackModes[gCurrentAttackMode] = false;
 			NextAttackMode();
@@ -967,7 +967,7 @@ float	r;
 		
 				/* UPDATE INFOBAR */
 				
-		if (--gWeaponInventory[gCurrentAttackMode] == 0)				// dec inventory & if run out, select next weapon
+		if (gWeaponInventory[gCurrentAttackMode] == 0)				// dec inventory & if run out, select next weapon
 		{
 			gPossibleAttackModes[gCurrentAttackMode] = false;
 			NextAttackMode();
@@ -1097,3 +1097,4 @@ float	s;
  
  
  
+

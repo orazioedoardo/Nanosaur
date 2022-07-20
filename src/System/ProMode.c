@@ -26,15 +26,15 @@ extern	SDL_Window		*gSDLWindow;
 void SetProModeSettings(int pro)
 {
 	PRO_MODE					= pro;
-	SUPERTILE_ACTIVE_RANGE		= pro ? 4 : 3;
-	MAX_ENEMIES					= pro ? 30 : 8;
-	MAX_PTERA					= pro ? 10 : 2;
-	MAX_REX						= pro ? 8 : 2;
-	MAX_SPITTER					= pro ? 2 : 12;  // weird... but these values were in the original source
-	MAX_STEGO					= pro ? 10 : 2;
-	MAX_TRICER					= pro ? 10 : 3;
+	SUPERTILE_ACTIVE_RANGE		= pro ? 20 : 3;
+	MAX_ENEMIES					= pro ? 300 : 8;
+	MAX_PTERA					= pro ? 100 : 2;
+	MAX_REX						= pro ? 80 : 2;
+	MAX_SPITTER					= pro ? 20 : 12;  // weird... but these values were in the original source
+	MAX_STEGO					= pro ? 100 : 2;
+	MAX_TRICER					= pro ? 100 : 3;
 	EXPLODEGEOMETRY_DENOMINATOR	= pro ? 1 : 4;
-	YON_DISTANCE				= pro ? 2800.0f : 1900.0f;
+	YON_DISTANCE				= pro ? 14000.0f : 1900.0f;
 	SONIC_SCREAM_RATE			= pro ? 4 : 4;
 	BLASTER_RATE				= pro ? 7 : 4;
 	HEATSEEK_RATE				= pro ? 2 : 2;

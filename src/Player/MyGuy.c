@@ -160,7 +160,7 @@ ObjNode	*theNode = gPlayerObj;
 
 	gPlayerGotKilledFlag = false;
 	gMyHealth = 1.0;
-	gFuel = 0;	
+	gFuel = 0;
 	gInfobarUpdateBits |= UPDATE_HEALTH|UPDATE_FUEL|UPDATE_SCORE|UPDATE_LIVES;
 
 	theNode->HurtTimer = 0;
@@ -700,7 +700,6 @@ int	oldFuel;
 			/* LOSE FUEL */
 			
 	oldFuel = gFuel;
-	gFuel -= gFramesPerSecondFrac * FUEL_LOSS_RATE;	
 	if (gFuel <= 0.0f)
 	{
 		gFuel = 0;
@@ -987,7 +986,6 @@ void PlayerGotHurt(ObjNode *theNode, float damage, Boolean doHurtAnim, Boolean o
 		theNode->InvincibleTimer = INVINCIBILITY_DURATION_SHORT;	// make me invincible for a shorter while
 	
 	
-	gMyHealth -= damage;										// take damage
 	gInfobarUpdateBits |= UPDATE_HEALTH;						// tell system to update this at end of frame
 	if (gMyHealth <= 0)											// see if was killed
 		KillPlayer(theNode);
