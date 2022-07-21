@@ -97,8 +97,8 @@ void ResetCameraSettings(void)
 	gCameraMode 		= CAMERA_MODE_MANUAL;
 	gCameraViewYAngle 	= 0;
 
-	gCameraLookAtAccel 	= 8;
-	gCameraFromAccel 	= 4.5;	//3.2;
+	gCameraLookAtAccel 	= 20;
+	gCameraFromAccel 	= 13.0;	//3.2;
 	gCameraFromAccelY	= 3;
 	gCameraDistFromMe 	= 300;
 	gCameraHeightFactor = 0.3;
