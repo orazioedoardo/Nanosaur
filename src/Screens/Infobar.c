@@ -214,6 +214,38 @@ unsigned long	bits;
 	gInfobarUpdateBits = 0;
 }
 
+/********************* PREVIOUS ATTACK MODE ***********************/
+
+void PrevAttackMode(void)
+{
+short	i;
+
+			/* SCAN FOR PREVIOUS AVAILABLE ATTACK MODE */
+
+	i = gCurrentAttackMode;
+
+	do
+	{
+		if (--i < 0)						// see if wrap around
+			i = NUM_ATTACK_MODES - 1;
+
+		if (gPossibleAttackModes[i])						// can I do this one?
+			break;
+
+	}while(i !=	gCurrentAttackMode);
+
+
+			/* SEE IF IT CHANGED */
+
+	if (i != gCurrentAttackMode)
+	{
+		gCurrentAttackMode = i;
+		gInfobarUpdateBits |= UPDATE_WEAPONICON;
+		PlayEffect(EFFECT_SELECT);		// play sound
+	}
+
+}
+
 
 /********************* NEXT ATTACK MODE ***********************/
 
