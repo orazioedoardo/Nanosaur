@@ -104,8 +104,11 @@ KeyControlType	bits;
 	if (GetNeedState(kNeed_JetDown))			// Jet Down
 		bits |= KEYCONTROL_JETDOWN;
 	
-	if (GetNewNeedState(kNeed_AttackMode))		// attack mode change
-		bits |= KEYCONTROL_ATTACKMODE;
+	if (GetNewNeedState(kNeed_PrevWeapon))		// Previous weapon
+		bits |= KEYCONTROL_PREVWEAPON;
+
+	if (GetNewNeedState(kNeed_NextWeapon))		// Next weapon
+		bits |= KEYCONTROL_NEXTWEAPON;
 
 	if (GetNewNeedState(kNeed_PickUp))			// try pickup
 		bits |= KEYCONTROL_PICKUP;
@@ -220,7 +223,10 @@ Byte		currentAnim;
 			/* SEE IF CHANGE ATTACK MODE */
 			/*****************************/
 			
-	if (bits & KEYCONTROL_ATTACKMODE)
+	if (bits & KEYCONTROL_PREVWEAPON)
+		PrevAttackMode();
+
+	if (bits & KEYCONTROL_NEXTWEAPON)
 		NextAttackMode();
 	
 	
@@ -323,8 +329,11 @@ KeyControlType	bits;
 
 	
 			/* SEE IF CHANGE ATTACK MODE */
-			
-	if (bits & KEYCONTROL_ATTACKMODE)
+
+	if (bits & KEYCONTROL_PREVWEAPON)
+		PrevAttackMode();
+
+	if (bits & KEYCONTROL_NEXTWEAPON)
 		NextAttackMode();	
 }
 
