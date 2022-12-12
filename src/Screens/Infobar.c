@@ -142,7 +142,7 @@ OSErr	err;
 	gNewObjectDefinition.group = MODEL_GROUP_INFOBAR;
 	gNewObjectDefinition.type = INFOBAR_ObjType_Compass;
 	gNewObjectDefinition.coord.x = 0;
-	gNewObjectDefinition.coord.y = -7;
+	gNewObjectDefinition.coord.y = -6.5;
 	gNewObjectDefinition.coord.z = INFOBAR_Z;
 	gNewObjectDefinition.flags = STATUS_BIT_DONTCULL;
 	gNewObjectDefinition.slot = INFOBAR_SLOT;
@@ -644,8 +644,8 @@ static TQ3Point3D				points[4] = { { -GPS_DISPLAY_SIZE,  GPS_DISPLAY_SIZE, 0 },
 			/* CREATE OBJECT TO DISPLAY THIS */
 
 	gNewObjectDefinition.genre = DISPLAY_GROUP_GENRE;
-	gNewObjectDefinition.coord.x = 8.5;
-	gNewObjectDefinition.coord.y = 5;
+	gNewObjectDefinition.coord.x = 11.75;
+	gNewObjectDefinition.coord.y = 4.67;
 	gNewObjectDefinition.coord.z = INFOBAR_Z;
 	gNewObjectDefinition.flags = STATUS_BIT_DONTCULL|STATUS_BIT_NULLSHADER|STATUS_BIT_HIGHFILTER;
 	gNewObjectDefinition.slot = INFOBAR_SLOT;
