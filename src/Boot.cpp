@@ -17,7 +17,7 @@ extern "C"
 	// bare minimum from Window.c to satisfy externs in game code
 	SDL_Window* gSDLWindow = nullptr;
 	WindowPtr gCoverWindow = nullptr;
-	UInt32* gCoverWindowPixPtr = nullptr;
+	UInt32* gBackdropPixels = nullptr;
 
 	// Lets the game know where to find its asset files
 	extern FSSpec gDataSpec;
@@ -75,7 +75,7 @@ retry:
 	// Initialize SDL video subsystem
 	if (0 != SDL_Init(SDL_INIT_VIDEO))
 	{
-		throw std::runtime_error("Couldn't initialize SDL video subsystem.");
+		throw std::runtime_error("Couldn't init SDL video subsystem: " + std::string(SDL_GetError()));
 	}
 
 	if (gGamePrefs.preferredDisplay >= SDL_GetNumVideoDisplays())
@@ -93,13 +93,23 @@ retry:
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 1 << gGamePrefs.antialiasingLevel);
 	}
 
+	// Prepare window dimensions
+	int display = gGamePrefs.preferredDisplay;
+	float screenFillRatio = 2.0f / 3.0f;
+
+	SDL_Rect displayBounds = { .x = 0, .y = 0, .w = GAME_VIEW_WIDTH, .h = GAME_VIEW_HEIGHT };
+	SDL_GetDisplayUsableBounds(display, &displayBounds);
+	TQ3Vector2D fitted = FitRectKeepAR(GAME_VIEW_WIDTH, GAME_VIEW_HEIGHT, displayBounds.w, displayBounds.h);
+	int initialWidth  = (int) (fitted.x * screenFillRatio);
+	int initialHeight = (int) (fitted.y * screenFillRatio);
+
 	gSDLWindow = SDL_CreateWindow(
 			"Nanosaur " PROJECT_VERSION,
 			SDL_WINDOWPOS_CENTERED_DISPLAY(gGamePrefs.preferredDisplay),
 			SDL_WINDOWPOS_CENTERED_DISPLAY(gGamePrefs.preferredDisplay),
-			640,
-			480,
-			SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
+			initialWidth,
+			initialHeight,
+			SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI);
 
 	if (!gSDLWindow)
 	{
@@ -114,13 +124,13 @@ retry:
 		}
 		else
 		{
-			throw std::runtime_error("Couldn't create SDL window.");
+			throw std::runtime_error("Couldn't create SDL window: " + std::string(SDL_GetError()));
 		}
 	}
 
 	// Set up globals that the game expects
 	gCoverWindow = Pomme::Graphics::GetScreenPort();
-	gCoverWindowPixPtr = (UInt32*) GetPixBaseAddr(GetGWorldPixMap(gCoverWindow));
+	gBackdropPixels = (UInt32*) GetPixBaseAddr(GetGWorldPixMap(gCoverWindow));
 
 	// Init gDataSpec
 	fs::path dataPath = FindGameData();
@@ -131,7 +141,7 @@ retry:
 		auto gamecontrollerdbPath8 = (dataPath / "System" / "gamecontrollerdb.txt").u8string();
 		if (-1 == SDL_GameControllerAddMappingsFromFile((const char*)gamecontrollerdbPath8.c_str()))
 		{
-			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, "Nanosaur", "Couldn't load gamecontrollerdb.txt!", gSDLWindow);
+			DoAlert("Couldn't load gamecontrollerdb.txt! No big deal, but gamepads may not work.");
 		}
 	}
 }

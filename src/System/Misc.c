@@ -111,9 +111,8 @@ static	Boolean beenHere = false;
 		DisposeSoundBank();
 
 //		ShowBugdomAd();
-		
-//		if (gQD3DInitialized)
-//			Q3Exit();
+
+		QD3D_Shutdown();
 	}
 
 	// Source port addition: save prefs before quitting if any setting was
@@ -178,40 +177,6 @@ void SetMyRandomSeed(unsigned long seed)
 	seed2_alt = 0;	
 	
 }
-
-
-
-/****************** ALLOC HANDLE ********************/
-
-Handle	AllocHandle(long size)
-{
-Handle	hand;
-OSErr	err;
-
-	hand = NewHandleClear(size);					// alloc in APPL
-	if (hand == nil)
-	{
-		hand = TempNewHandle(size,&err);			// try TEMP mem
-		if (hand == nil)
-		{
-			DoFatalAlert("AllocHandle: failed!");
-			return(nil);
-		}
-		else
-			return(hand);							// use TEMP
-	}
-
-	return(hand);									// use APPL	
-}
-
-
-/****************** ALLOC PTR ********************/
-
-Ptr	AllocPtr(long size)
-{
-	return NewPtr(size);
-}
-
 
 
 #pragma mark -

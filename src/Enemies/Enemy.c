@@ -94,9 +94,8 @@ static const int enemyPoints[]=
 // OUTPUT: true = was deleted
 //
 
-Boolean DoEnemyCollisionDetect(ObjNode *theEnemy, unsigned long ctype)
+Boolean DoEnemyCollisionDetect(ObjNode *theEnemy, uint32_t ctype)
 {
-short	i;
 ObjNode	*hitObj;
 
 
@@ -110,7 +109,7 @@ ObjNode	*hitObj;
 			/******************************/
 			
 
-	for (i=0; i < gNumCollisions; i++)						
+	for (int i = 0; i < gNumCollisions; i++)
 	{
 		if (gCollisionList[i].type == COLLISION_TYPE_OBJ)
 		{
@@ -209,7 +208,8 @@ float	d,minDist = 100000;
 	}
 	while (thisNodePtr != nil);
 
-	*dist = minDist;
+	if (dist)
+		*dist = minDist;
 	return(best);
 }
 
