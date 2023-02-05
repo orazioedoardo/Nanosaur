@@ -46,8 +46,6 @@ jobs:
   build-macos:
     runs-on: macos-11
     timeout-minutes: 15
-    env:
-      CODE_SIGN_IDENTITY: ${{ secrets.APPLE_CODE_SIGN_IDENTITY }}
     steps:
       - uses: actions/checkout@v3
         with:
