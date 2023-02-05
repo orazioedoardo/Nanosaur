@@ -143,7 +143,7 @@ OSErr	err;
 	gNewObjectDefinition.group = MODEL_GROUP_INFOBAR;
 	gNewObjectDefinition.type = INFOBAR_ObjType_Compass;
 	gNewObjectDefinition.coord.x = 0;
-	gNewObjectDefinition.coord.y = -7;
+	gNewObjectDefinition.coord.y = -6.5;
 	gNewObjectDefinition.coord.z = INFOBAR_Z;
 	gNewObjectDefinition.flags = STATUS_BIT_DONTCULL;
 	gNewObjectDefinition.slot = INFOBAR_SLOT;
