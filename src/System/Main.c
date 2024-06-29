@@ -51,7 +51,7 @@ FSSpec		gDataSpec;
 void InitDefaultPrefs(void)
 {
 	memset(&gGamePrefs, 0, sizeof(gGamePrefs));
-	snprintf(gGamePrefs.magic, sizeof(gGamePrefs.magic), "%s", PREFS_MAGIC);
+	SDL_snprintf(gGamePrefs.magic, sizeof(gGamePrefs.magic), "%s", PREFS_MAGIC);
 
 	gGamePrefs.highQualityTextures = true;			// set the defaults
 	gGamePrefs.canDoFog = true;
@@ -335,14 +335,14 @@ FSSpec	spec;
 	
 	if (gWonGameFlag)
 	{
-		FSMakeFSSpec(gDataSpec.vRefNum, gDataSpec.parID, ":movies:Win.mov", &spec);
+		FSMakeFSSpec(gDataSpec.vRefNum, gDataSpec.parID, ":Movies:Win.mov", &spec);
 		PlayAMovie(&spec);
 	}
 	
 			/* PLAY LOSE MOVIE */
 	else
 	{
-		FSMakeFSSpec(gDataSpec.vRefNum, gDataSpec.parID, ":movies:Lose.mov", &spec);
+		FSMakeFSSpec(gDataSpec.vRefNum, gDataSpec.parID, ":Movies:Lose.mov", &spec);
 		PlayAMovie(&spec);
 	}
 
