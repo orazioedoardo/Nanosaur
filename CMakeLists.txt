@@ -4,7 +4,7 @@ set(GAME_TARGET				"Nanosaur")
 set(GAME_FULL_NAME			"Nanosaur")
 set(GAME_VERSION			"1.4.5")
 set(GAME_IDENTIFIER			"io.jor.nanosaur")
-set(GAME_COPYRIGHT			"© 1998 Pangea Software, Inc., © 2025 Iliyas Jorio.")
+set(GAME_COPYRIGHT			"© 1998 Pangea Software, Inc., © 2026 Iliyas Jorio.")
 
 set(GAME_DATADIR			"${CMAKE_SOURCE_DIR}/Data")
 set(GAME_SRCDIR				"${CMAKE_SOURCE_DIR}/src")
