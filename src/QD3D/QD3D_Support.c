@@ -60,6 +60,17 @@ void QD3D_Boot(void)
 
 	gGLContext = SDL_GL_CreateContext(gSDLWindow);									// also makes it current
 	GAME_ASSERT_MESSAGE(gGLContext, SDL_GetError());
+
+				/* FLUSH ANY GL ERRORS BEFORE STARTING */
+
+	// On some configs (e.g. virgl), SDL_GL_CreateContext may trigger some GL
+	// error and yet return a valid GL context. Ignore that error, and don't
+	// let it trickle to our rendering code.
+	GLenum err = glGetError();
+	if (err != GL_NO_ERROR)
+	{
+		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Ignoring GL error 0x%x during context creation", err);
+	}
 }
 
 
