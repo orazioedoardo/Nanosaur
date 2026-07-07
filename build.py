@@ -46,15 +46,18 @@ game_package        = game_metadata["GAME_IDENTIFIER"]  # unique package identif
 game_ver            = game_metadata["GAME_VERSION"]
 game_docs           = ["CHANGELOG.md", "docs/*.md", "docs/*.pdf"]
 
-sdl_ver             = "3.2.8"
-appimagetool_ver    = "1.9.0"
+sdl_ver             = "3.4.4"
+appimagetool_ver    = "1.9.1"
+linuxdeploy_ver     = "1-alpha-20251107-1"
 
 lib_hashes = {  # sha-256
-    f"SDL3-{sdl_ver}.dmg":              "413f522a1519c8fcf28cb378a07d320164859b3c56ffe0160448502652809d2b",
-    f"SDL3-{sdl_ver}.tar.gz":           "13388fabb361de768ecdf2b65e52bb27d1054cae6ccb6942ba926e378e00db03",
-    f"SDL3-devel-{sdl_ver}-VC.zip":     "a674c6a6c7ece82227ceeb879c35fd4716e351752ff8b030f8629d832d028fa7",
-    "appimagetool-aarch64.AppImage":    "04f45ea45b5aa07bb2b071aed9dbf7a5185d3953b11b47358c1311f11ea94a96",
-    "appimagetool-x86_64.AppImage":     "46fdd785094c7f6e545b61afcfb0f3d98d8eab243f644b4b17698c01d06083d1",
+    f"SDL3-{sdl_ver}.dmg":              "9605141efc02a4d1964c0c19e2075b776533102815eaff33dfdaac511421b82d",
+    f"SDL3-{sdl_ver}.tar.gz":           "ee712dbe6a89bb140bbfc2ce72358fb5ee5cc2240abeabd54855012db30b3864",
+    f"SDL3-devel-{sdl_ver}-VC.zip":     "b3eaafc6ba06395b140579f14aff64a624eb690735496a5d508854c4c4bf732b",
+    "appimagetool-aarch64.AppImage":    "f0837e7448a0c1e4e650a93bb3e85802546e60654ef287576f46c71c126a9158",
+    "appimagetool-x86_64.AppImage":     "ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0",
+    "linuxdeploy-aarch64.AppImage":     "620095110d693282b8ebeb244a95b5e911cf8f65f76c88b4b47d16ae6346fcff",
+    "linuxdeploy-x86_64.AppImage":      "c20cd71e3a4e3b80c3483cef793cda3f4e990aca14014d23c544ca3ce1270b4d",
 }
 
 NPROC = multiprocessing.cpu_count()
@@ -111,9 +114,6 @@ if SYSTEM == "Linux":
     parser.add_argument("--system-sdl", default=False, action="store_true",
         help="use system SDL instead of building SDL from scratch")
 
-    parser.add_argument("--no-appimage", default=False, action="store_true",
-        help="don't generate an AppImage in step 4")
-
 args = parser.parse_args()
 
 dist_dir = os.path.abspath(args.dist_dir)
@@ -151,7 +151,7 @@ def hash_file(path):
             hasher.update(chunk)
     return hasher.hexdigest()
 
-def get_package(url):
+def get_package(url, executable=False):
     name = url[url.rfind('/')+1:]
 
     if name in lib_hashes:
@@ -170,6 +170,9 @@ def get_package(url):
     actual_hash = hash_file(path)
     if reference_hash != actual_hash:
         die(f"Bad checksum for {name}: expected {reference_hash}, got {actual_hash}")
+
+    if executable:
+        os.chmod(path, 0o755)
 
     return path
 
@@ -356,7 +359,7 @@ class MacProject(Project):
 
 
 class LinuxProject(Project):
-    def __init__(self, dir_name, config_name, custom_sdl_path, as_appimage):
+    def __init__(self, dir_name, config_name, custom_sdl_path):
         super().__init__(dir_name)
 
         self.gen_args += ["-DCMAKE_BUILD_TYPE=" + config_name]
@@ -369,14 +372,9 @@ class LinuxProject(Project):
         else:
             self.use_system_sdl = True
 
-        self.as_appimage = as_appimage
-
     def get_artifact_name(self, extension=None):
         if extension is None:
-            if self.as_appimage:
-                extension = ".AppImage"
-            else:
-                extension = ".AppDir"
+            extension = ".AppImage"
 
         return f"{game_name}-{game_ver}-linux-{MACHINE}{extension}"
 
@@ -398,45 +396,33 @@ class LinuxProject(Project):
             call(["cmake", "--install", sdl_build_dir])
 
     def package(self):
-        if self.as_appimage:
-            appdir = cache_dir + "/" + self.get_artifact_name(extension=".AppDir")
-        else:
-            appdir = self.get_artifact_path()
-
+        appdir = cache_dir + "/" + self.get_artifact_name(extension=".AppDir")
         assert appdir.endswith(".AppDir")
         rmtree_if_exists(appdir)
 
-        # Prepare directory tree before copying files
-        for d in ["", "usr/bin", "usr/lib", "usr/share/metainfo", "usr/share/applications"]:
-            os.makedirs(f"{appdir}/{d}", exist_ok=True)
+        # Prepare AppDir contents with linuxdeploy
+        linuxdeploy_path = get_package(f"https://github.com/linuxdeploy/linuxdeploy/releases/download/{linuxdeploy_ver}/linuxdeploy-{MACHINE}.AppImage", executable=True)
+        call([
+            linuxdeploy_path,
+            f"--appdir={appdir}",
+            f"--executable={self.dir_name}/{game_name}",
+            "--custom-apprun=packaging/AppRun",
+            f"--desktop-file=packaging/{game_package}.desktop",
+            f"--icon-file=packaging/{game_package}.png",
+            f"--library={libs_dir}/SDL3-{sdl_ver}/install/lib/libSDL3.so",
+            "--exclude-library=libX*",
+        ])
 
-        # Copy executable and assets
-        shutil.copy(f"{self.dir_name}/{game_name}", f"{appdir}/usr/bin")  # executable
+        # Fill in appdir with additional assets
+        os.makedirs(f"{appdir}/usr/share/metainfo", exist_ok=True)
+        shutil.copy(f"packaging/{game_package}.appdata.xml", f"{appdir}/usr/share/metainfo")
         shutil.copytree("Data", f"{appdir}/Data")
         self.copy_documentation(appdir, everything=False)
 
-        # Copy XDG stuff
-        shutil.copy(f"packaging/{game_package}.desktop", appdir)
-        shutil.copy(f"packaging/{game_package}.png", appdir)
-        shutil.copy(f"packaging/{game_package}.appdata.xml", f"{appdir}/usr/share/metainfo")
-        shutil.copy(f"packaging/{game_package}.desktop", f"{appdir}/usr/share/applications")  # must copy desktop file there as well, for validation
-
-        # Copy AppImage kicker script
-        shutil.copy(f"packaging/AppRun", appdir)
-        os.chmod(f"{appdir}/AppRun", 0o755)
-
-        # Copy SDL (if not using system SDL)
-        if not self.use_system_sdl:
-            for file in glob.glob(f"{libs_dir}/SDL3-{sdl_ver}/install/lib/libSDL3*.so*"):
-                shutil.copy(file, f"{appdir}/usr/lib", follow_symlinks=False)
-
-        # Invoke appimagetool
-        if self.as_appimage:
-            appimagetool_path = get_package(f"https://github.com/AppImage/appimagetool/releases/download/{appimagetool_ver}/appimagetool-{MACHINE}.AppImage")
-            os.chmod(appimagetool_path, 0o755)
-
-            rm_if_exists(self.get_artifact_path())
-            call([appimagetool_path, appdir, self.get_artifact_path()])
+        # Create AppImage with appimagetool
+        rm_if_exists(self.get_artifact_path())
+        appimagetool_path = get_package(f"https://github.com/AppImage/appimagetool/releases/download/{appimagetool_ver}/appimagetool-{MACHINE}.AppImage", executable=True)
+        call([appimagetool_path, appdir, self.get_artifact_path()])
 
 #----------------------------------------------------------------
 
@@ -457,7 +443,7 @@ if __name__ == "__main__":
         custom_sdl_path = ""
         if not args.system_sdl:
             custom_sdl_path = f"{libs_dir}/SDL3-{sdl_ver}/install"
-        project = LinuxProject(build_dir, "RelWithDebInfo", custom_sdl_path, not args.no_appimage)
+        project = LinuxProject(build_dir, "RelWithDebInfo", custom_sdl_path)
     else:
         die(f"Unsupported system for configure step: {SYSTEM}")
 
