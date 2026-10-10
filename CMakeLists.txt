@@ -346,7 +346,10 @@ else()
 	set(GAME_DATA_TARGET_LOCATION "$<TARGET_FILE_DIR:${GAME_TARGET}>/Data")
 endif()
 
-if(NOT EMSCRIPTEN)	# web build preloads Data into the .data bundle instead
+if(EMSCRIPTEN)	# web build preloads Data into the .data bundle instead, and only needs the icon next to the page
+	add_custom_command(TARGET ${GAME_TARGET} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/packaging/${GAME_TARGET}.png" "$<TARGET_FILE_DIR:${GAME_TARGET}>/icon.png")
+else()
 	add_custom_command(TARGET ${GAME_TARGET} POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy_directory "${GAME_DATADIR}" "${GAME_DATA_TARGET_LOCATION}")
 endif()
