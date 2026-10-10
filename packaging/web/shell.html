@@ -94,6 +94,20 @@
 	canvas.getContext = (type, attrs) =>
 		getContext(type, type.startsWith("webgl") ? { ...attrs, powerPreference: "high-performance" } : attrs);
 
+	// Cmd+F toggles fullscreen. This runs before the game's own key handling,
+	// so the game never sees the keypress and the browser doesn't open its Find bar.
+	window.addEventListener("keydown", (e) => {
+		if (e.code === "KeyF" && e.metaKey && !e.repeat) {
+			e.preventDefault();
+			e.stopImmediatePropagation();
+			if (document.fullscreenElement) {
+				document.exitFullscreen();
+			} else {
+				document.getElementById("stage").requestFullscreen();
+			}
+		}
+	}, true);
+
 	// WebGL contexts can be lost (e.g. GPU reset); the game can't recover from that
 	canvas.addEventListener("webglcontextlost", (e) => {
 		e.preventDefault();

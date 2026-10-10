@@ -64,7 +64,7 @@ void InitDefaultPrefs(void)
 	gGamePrefs.antialiasingLevel = 0;
 	gGamePrefs.vsync = true;
 	gGamePrefs.mainMenuHelp = true;
-	gGamePrefs.extreme = false;
+	gGamePrefs.extreme = true;
 	gGamePrefs.music = true;
 	gGamePrefs.ambientSounds = true;
 	gGamePrefs.nanosaurTeethFix = true;
