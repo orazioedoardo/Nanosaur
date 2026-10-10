@@ -129,6 +129,16 @@
 		canvas,
 		print: (text) => console.log(text),
 		printErr: (text) => console.warn(text),
+		preRun: [() => {
+			const dir = "/home/web_user/.config/Nanosaur";
+			Module.FS.mkdirTree(dir);
+			Module.FS.mount(IDBFS, {}, dir);
+			Module.addRunDependency("syncfs");
+			Module.FS.syncfs(true, (err) => {
+				if (err) console.warn("Loading saved files failed:", err);
+				Module.removeRunDependency("syncfs");
+			});
+		}],
 		setStatus(text) {
 			// Emscripten reports download progress as "Downloading data... (x/y)"
 			const m = text.match(/\((\d+(?:\.\d+)?)\/(\d+)\)/);

@@ -270,7 +270,8 @@ if(EMSCRIPTEN)
 		-sALLOW_MEMORY_GROWTH
 		-sFULL_ES2
 		-sINVOKE_RUN=0
-		-sEXPORTED_RUNTIME_METHODS=callMain
+		-sEXPORTED_RUNTIME_METHODS=callMain,FS
+		-lidbfs.js
 		"--preload-file=${GAME_DATADIR}@/Data"
 		"--shell-file=${CMAKE_SOURCE_DIR}/packaging/web/shell.html")
 endif()

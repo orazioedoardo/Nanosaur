@@ -55,6 +55,7 @@ void InitDefaultPrefs(void);
 OSErr MakePrefsFSSpec(const char* prefFileName, FSSpec* spec);
 OSErr LoadPrefs(void);
 extern	void SavePrefs(PrefsType *prefs);
+void SyncPrefsFolder(void);
 extern	Ptr	LoadAFile(FSSpec* fsSpec, long* outSize);
 
 extern	void LoadTerrainTileset(FSSpec *fsSpec);

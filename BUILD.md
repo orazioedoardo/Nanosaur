@@ -74,7 +74,7 @@ The web build uses [Emscripten](https://emscripten.org) to compile the game to W
     ```
     Then open http://localhost:8000/Nanosaur.html. Opening the HTML file directly from disk won't work.
 
-The web page template lives in `packaging/web/shell.html`.
+The web page template lives in `packaging/web/shell.html`. Preferences (including key bindings) and high scores are kept in the browser's IndexedDB.
 
 ## How to build the game manually on Linux et al.
 
