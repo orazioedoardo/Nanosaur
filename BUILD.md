@@ -68,7 +68,7 @@ The web build uses [Emscripten](https://emscripten.org) to compile the game to W
     emcmake cmake -S . -B build-web -DCMAKE_BUILD_TYPE=Release
     cmake --build build-web
     ```
-1. The game gets built in `build-web`: `Nanosaur.html`, `Nanosaur.js`, `Nanosaur.wasm` and `Nanosaur.data` (the game's assets). Serve that folder over HTTP, for example:
+1. The game gets built in `build-web`: `Nanosaur.html`, `Nanosaur.js`, `Nanosaur.wasm`, `Nanosaur.data` (the game's assets) and `Nanosaur.png`. Serve that folder over HTTP, for example:
     ```
     python3 -m http.server --directory build-web
     ```
