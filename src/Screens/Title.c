@@ -408,7 +408,7 @@ static void Slideshow(const struct SlideshowEntry* slides)
 			Render_StartFrame();
 			Render_DrawBackdrop(true);
 			Render_EndFrame();
-			SDL_GL_SwapWindow(gSDLWindow);
+			SwapGameWindow();
 
 			if (gamma < 100)
 				wantOut = false;

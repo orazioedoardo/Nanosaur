@@ -55,7 +55,11 @@ void InitDefaultPrefs(void)
 	gGamePrefs.canDoFog = true;
 	gGamePrefs.shadows = true;
 	gGamePrefs.dust = true;
+#if __EMSCRIPTEN__
+	gGamePrefs.fullscreen = false;					// stay inside the web page until the player asks for fullscreen
+#else
 	gGamePrefs.fullscreen = true;
+#endif
 	gGamePrefs.displayNum = 0;
 	gGamePrefs.antialiasingLevel = 0;
 	gGamePrefs.vsync = true;

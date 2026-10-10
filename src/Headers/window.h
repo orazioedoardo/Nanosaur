@@ -13,3 +13,9 @@ int GetNumDisplays(void);
 SDL_DisplayID GetPreferredSDLDisplayID(void);
 void MoveToPreferredDisplay(void);
 void SetFullscreenMode(bool enforceDisplayPref);
+void SwapGameWindow(void);
+
+#if __EMSCRIPTEN__
+extern double	gAnimationFrameTime;
+extern uint32_t	gAnimationFrameCount;
+#endif

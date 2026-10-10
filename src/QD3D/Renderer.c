@@ -1041,7 +1041,7 @@ void Render_FreezeFrameFadeOut(void)
 			Render_StartFrame();
 			Render_DrawBackdrop(true);
 			Render_EndFrame();
-			SDL_GL_SwapWindow(gSDLWindow);
+			SwapGameWindow();
 		}
 		else if (gTerrainPtr)
 		{

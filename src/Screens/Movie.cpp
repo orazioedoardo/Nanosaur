@@ -77,7 +77,7 @@ void PlayAMovie(FSSpec* spec)
 		Render_StartFrame();
 		Render_DrawBackdrop(true);
 		Render_EndFrame();
-		SDL_GL_SwapWindow(gSDLWindow);
+		SwapGameWindow();
 
 		unsigned int endTicks = SDL_GetTicks();
 		int diffTicks = endTicks - startTicks;

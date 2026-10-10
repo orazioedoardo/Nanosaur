@@ -44,6 +44,20 @@ static RenderModifiers	gShardRenderMods;
 static ShardType		gShardMemory[MAX_SHARDS];
 static Pool				*gShardPool = NULL;
 
+		/* SHARD BATCHING */
+		//
+		// Instead of issuing one draw call per shard (each shard is a single triangle with its own
+		// transform), shards that look alike are pre-transformed into a shared vertex buffer and
+		// drawn together. This matters a lot in the browser, where each draw call is expensive.
+		//
+
+#define	MAX_SHARD_BATCHES	64
+
+static TQ3TriMeshData*	gShardBatchStorage = NULL;				// vertex storage for all batches
+static TQ3TriMeshData	gShardBatches[MAX_SHARD_BATCHES];		// each batch views a slice of gShardBatchStorage
+static TQ3Point3D		gShardBatchCenters[MAX_SHARD_BATCHES];
+static int16_t			gShardBatchOfShard[MAX_SHARDS];
+
 
 
 /*************** QD3D: CALC OBJECT BOUNDING BOX ************************/
@@ -135,6 +149,9 @@ void QD3D_InitShards(void)
 
 	Render_SetDefaultModifiers(&gShardRenderMods);
 	gShardRenderMods.statusBits |= STATUS_BIT_KEEPBACKFACES;			// draw both faces on shards
+
+	gShardBatchStorage = Q3TriMeshData_New(MAX_SHARDS, MAX_SHARDS * 3,
+			kQ3TriMeshDataFeatureVertexUVs | kQ3TriMeshDataFeatureVertexNormals | kQ3TriMeshDataFeatureVertexColors);
 }
 
 
@@ -152,6 +169,12 @@ void QD3D_DisposeShards(void)
 			Q3TriMeshData_Dispose(shard->mesh);
 			shard->mesh = nil;
 		}
+	}
+
+	if (gShardBatchStorage)
+	{
+		Q3TriMeshData_Dispose(gShardBatchStorage);
+		gShardBatchStorage = nil;
 	}
 }
 
@@ -396,19 +419,137 @@ next:
 }
 
 
+/************************* SHARD LOOKS LIKE BATCH ****************************/
+//
+// Returns true if the shard can be drawn in the same draw call as the batch.
+//
+
+static bool ShardLooksLikeBatch(const TQ3TriMeshData* shard, const TQ3TriMeshData* batch)
+{
+	return shard->texturingMode == batch->texturingMode
+		&& (shard->texturingMode == kQ3TexturingModeOff || shard->glTextureName == batch->glTextureName)
+		&& shard->hasVertexColors == batch->hasVertexColors
+		&& shard->diffuseColor.r == batch->diffuseColor.r
+		&& shard->diffuseColor.g == batch->diffuseColor.g
+		&& shard->diffuseColor.b == batch->diffuseColor.b
+		&& shard->diffuseColor.a == batch->diffuseColor.a;
+}
+
+
 /************************* QD3D: DRAW SHARDS ****************************/
 
 void QD3D_DrawShards(QD3DSetupOutputType *setupInfo)
 {
 	(void) setupInfo;
 
-	if (!gShardPool)												// quick check if any shards at all
+	if (!gShardPool || Pool_Empty(gShardPool))						// quick check if any shards at all
 		return;
+
+	int numBatches = 0;
+	int batchSizes[MAX_SHARD_BATCHES];
+
+			/* ASSIGN EACH SHARD TO A BATCH OF SHARDS THAT LOOK ALIKE */
 
 	for (int i = Pool_First(gShardPool); i >= 0; i = Pool_Next(gShardPool, i))
 	{
-		ShardType* shard = &gShardMemory[i];
-		Render_SubmitMesh(shard->mesh, &shard->matrix, &gShardRenderMods, &shard->coord);
+		const TQ3TriMeshData* mesh = gShardMemory[i].mesh;
+
+		int b;
+		for (b = 0; b < numBatches; b++)
+		{
+			if (ShardLooksLikeBatch(mesh, &gShardBatches[b]))
+				break;
+		}
+
+		if (b == numBatches)											// no match: start a new batch
+		{
+			if (numBatches == MAX_SHARD_BATCHES)						// out of batches: draw this shard on its own
+			{
+				gShardBatchOfShard[i] = -1;
+				continue;
+			}
+
+			TQ3TriMeshData* batch = &gShardBatches[b];
+			*batch = *gShardBatchStorage;								// copy storage header (feature flags etc.)
+			batch->texturingMode		= mesh->texturingMode;
+			batch->glTextureName		= mesh->glTextureName;
+			batch->internalTextureID	= mesh->internalTextureID;
+			batch->diffuseColor			= mesh->diffuseColor;
+			batch->hasVertexColors		= mesh->hasVertexColors;
+			batch->hasVertexNormals		= true;
+			batchSizes[b] = 0;
+			gShardBatchCenters[b] = (TQ3Point3D) {0, 0, 0};
+			numBatches++;
+		}
+
+		gShardBatchOfShard[i] = (int16_t) b;
+		batchSizes[b]++;
+	}
+
+			/* CARVE OUT EACH BATCH'S SLICE OF THE VERTEX STORAGE */
+
+	int firstTriangle = 0;
+	for (int b = 0; b < numBatches; b++)
+	{
+		TQ3TriMeshData* batch = &gShardBatches[b];
+		batch->triangles		= gShardBatchStorage->triangles		+ firstTriangle;
+		batch->points			= gShardBatchStorage->points		+ firstTriangle * 3;
+		batch->vertexNormals	= gShardBatchStorage->vertexNormals	+ firstTriangle * 3;
+		batch->vertexUVs		= gShardBatchStorage->vertexUVs		+ firstTriangle * 3;
+		batch->vertexColors		= gShardBatchStorage->vertexColors	+ firstTriangle * 3;
+		batch->numTriangles		= 0;
+		batch->numPoints		= 0;
+		firstTriangle += batchSizes[b];
+	}
+
+			/* TRANSFORM EACH SHARD INTO ITS BATCH */
+
+	for (int i = Pool_First(gShardPool); i >= 0; i = Pool_Next(gShardPool, i))
+	{
+		const ShardType* shard = &gShardMemory[i];
+		const TQ3TriMeshData* mesh = shard->mesh;
+
+		int b = gShardBatchOfShard[i];
+		if (b < 0)
+		{
+			Render_SubmitMesh(shard->mesh, &shard->matrix, &gShardRenderMods, &shard->coord);
+			continue;
+		}
+
+		TQ3TriMeshData* batch = &gShardBatches[b];
+		int v0 = batch->numPoints;
+
+		for (int v = 0; v < 3; v++)
+		{
+			Q3Point3D_TransformAffine(&mesh->points[v], &shard->matrix, &batch->points[v0 + v]);
+			// GL_NORMALIZE is on, so the scale baked into the matrix doesn't matter for normals
+			Q3Vector3D_Transform(&mesh->vertexNormals[v], &shard->matrix, &batch->vertexNormals[v0 + v]);
+			batch->triangles[batch->numTriangles].pointIndices[v] = v0 + v;
+
+			if (mesh->texturingMode != kQ3TexturingModeOff)
+				batch->vertexUVs[v0 + v] = mesh->vertexUVs[v];
+			if (mesh->hasVertexColors)
+				batch->vertexColors[v0 + v] = mesh->vertexColors[v];
+		}
+
+		batch->numPoints += 3;
+		batch->numTriangles++;
+
+		gShardBatchCenters[b].x += shard->coord.x;
+		gShardBatchCenters[b].y += shard->coord.y;
+		gShardBatchCenters[b].z += shard->coord.z;
+	}
+
+			/* SUBMIT BATCHES */
+
+	for (int b = 0; b < numBatches; b++)
+	{
+		float n = (float) gShardBatches[b].numTriangles;
+		gShardBatchCenters[b].x /= n;									// depth-sort the batch by its average shard position
+		gShardBatchCenters[b].y /= n;
+		gShardBatchCenters[b].z /= n;
+
+		Render_SubmitMesh(&gShardBatches[b], NULL, &gShardRenderMods, &gShardBatchCenters[b]);
 	}
 }
 
