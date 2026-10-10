@@ -255,7 +255,7 @@ else()
 endif()
 
 # Web build: the game's blocking loops yield to the browser via asyncify
-# (SDL_GL_SwapWindow sleeps for us), and game data is preloaded into the virtual FS
+# (SwapGameWindow waits for the next animation frame), and game data is preloaded into the virtual FS
 if(EMSCRIPTEN)
 	# gl4es only exports gl4es_-prefixed symbols on Emscripten; its GL/gl.h maps the
 	# standard names onto them. Include it first so SDL_opengl.h defers to it.
